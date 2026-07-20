@@ -8,7 +8,6 @@ import {
     FunnelIcon,
     CalendarIcon,
     BookOpenIcon,
-    ClipboardDocumentIcon,
     DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import { Publication } from '@/types/publication';
@@ -34,8 +33,9 @@ export default function PublicationsList({
     const [selectedYear, setSelectedYear] = useState<number | 'all'>('all');
     const [selectedType, setSelectedType] = useState<string | 'all'>('all');
     const [showFilters, setShowFilters] = useState(false);
-    const [expandedBibtexId, setExpandedBibtexId] = useState<string | null>(null);
-    const [expandedAbstractId, setExpandedAbstractId] = useState<string | null>(null);
+    const [expandedAbstractId, setExpandedAbstractId] = useState<string | null>(
+        null
+    );
 
     // Extract unique years for the filter.
     const years = useMemo(() => {
@@ -61,9 +61,13 @@ export default function PublicationsList({
             const normalizedSearchQuery = searchQuery.toLowerCase();
 
             const matchesSearch =
-                publication.title.toLowerCase().includes(normalizedSearchQuery) ||
+                publication.title
+                    .toLowerCase()
+                    .includes(normalizedSearchQuery) ||
                 publication.authors.some(author =>
-                    author.name.toLowerCase().includes(normalizedSearchQuery)
+                    author.name
+                        .toLowerCase()
+                        .includes(normalizedSearchQuery)
                 ) ||
                 publication.journal
                     ?.toLowerCase()
@@ -144,7 +148,9 @@ export default function PublicationsList({
 
                         <input
                             type="text"
-                            placeholder={messages.publications.searchPlaceholder}
+                            placeholder={
+                                messages.publications.searchPlaceholder
+                            }
                             value={searchQuery}
                             onChange={event =>
                                 setSearchQuery(event.target.value)
@@ -343,7 +349,10 @@ export default function PublicationsList({
                                                 } text-neutral-600 dark:text-neutral-400 mb-2`}
                                             >
                                                 {publication.authors.map(
-                                                    (author, authorIndex) => (
+                                                    (
+                                                        author,
+                                                        authorIndex
+                                                    ) => (
                                                         <span key={authorIndex}>
                                                             <span
                                                                 className={`${
@@ -387,9 +396,17 @@ export default function PublicationsList({
                                             </p>
 
                                             <p className="text-sm font-medium text-neutral-800 dark:text-neutral-600 mb-3">
-                                                {publication.journal ||
-                                                    publication.conference}{' '}
-                                                {publication.year}
+                                                {publication.type ===
+                                                'preprint'
+                                                    ? publication.journal ||
+                                                      publication.conference
+                                                    : `${
+                                                          publication.journal ||
+                                                          publication.conference ||
+                                                          ''
+                                                      } ${
+                                                          publication.year
+                                                      }`}
                                             </p>
 
                                             {publication.description && (
@@ -455,33 +472,6 @@ export default function PublicationsList({
                                                         }
                                                     </button>
                                                 )}
-
-                                                {publication.bibtex && (
-                                                    <button
-                                                        onClick={() =>
-                                                            setExpandedBibtexId(
-                                                                expandedBibtexId ===
-                                                                    publication.id
-                                                                    ? null
-                                                                    : publication.id
-                                                            )
-                                                        }
-                                                        className={cn(
-                                                            'inline-flex items-center px-3 py-1 rounded-md text-xs font-medium transition-colors',
-                                                            expandedBibtexId ===
-                                                                publication.id
-                                                                ? 'bg-accent text-white'
-                                                                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-accent hover:text-white'
-                                                        )}
-                                                    >
-                                                        <BookOpenIcon className="h-3 w-3 mr-1.5" />
-                                                        {
-                                                            messages
-                                                                .publications
-                                                                .bibtex
-                                                        }
-                                                    </button>
-                                                )}
                                             </div>
 
                                             <AnimatePresence>
@@ -510,52 +500,6 @@ export default function PublicationsList({
                                                                     publication.abstract
                                                                 }
                                                             </p>
-                                                        </div>
-                                                    </motion.div>
-                                                ) : null}
-
-                                                {expandedBibtexId ===
-                                                    publication.id &&
-                                                publication.bibtex ? (
-                                                    <motion.div
-                                                        key="bibtex"
-                                                        initial={{
-                                                            opacity: 0,
-                                                            height: 0
-                                                        }}
-                                                        animate={{
-                                                            opacity: 1,
-                                                            height: 'auto'
-                                                        }}
-                                                        exit={{
-                                                            opacity: 0,
-                                                            height: 0
-                                                        }}
-                                                        className="overflow-hidden mt-4"
-                                                    >
-                                                        <div className="relative bg-neutral-50 dark:bg-neutral-800 rounded-lg p-4 border border-neutral-200 dark:border-neutral-700">
-                                                            <pre className="text-xs text-neutral-600 dark:text-neutral-500 overflow-x-auto whitespace-pre-wrap font-mono">
-                                                                {
-                                                                    publication.bibtex
-                                                                }
-                                                            </pre>
-
-                                                            <button
-                                                                onClick={() => {
-                                                                    navigator.clipboard.writeText(
-                                                                        publication.bibtex ||
-                                                                            ''
-                                                                    );
-                                                                }}
-                                                                className="absolute top-2 right-2 p-1.5 rounded-md bg-white dark:bg-neutral-700 text-neutral-500 hover:text-accent shadow-sm border border-neutral-200 dark:border-neutral-600 transition-colors"
-                                                                title={
-                                                                    messages
-                                                                        .common
-                                                                        .copyToClipboard
-                                                                }
-                                                            >
-                                                                <ClipboardDocumentIcon className="h-4 w-4" />
-                                                            </button>
                                                         </div>
                                                     </motion.div>
                                                 ) : null}
