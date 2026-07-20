@@ -5,26 +5,62 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import {
     EnvelopeIcon,
-    AcademicCapIcon,
     HeartIcon,
     MapPinIcon
 } from '@heroicons/react/24/outline';
 import {
     MapPinIcon as MapPinSolidIcon,
-    EnvelopeIcon as EnvelopeSolidIcon
+    EnvelopeIcon as EnvelopeSolidIcon,
+    HeartIcon as HeartSolidIcon
 } from '@heroicons/react/24/solid';
-import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { Github, Linkedin, Pin } from 'lucide-react';
 import type { SiteConfig } from '@/lib/config';
 import { useMessages } from '@/lib/i18n/useMessages';
 
 /*
- * SSRN icon.
- *
- * This custom SVG displays the letters SSRN inside the same
- * 24 × 24 icon space used by the other social icons.
+ * Google Scholar icon.
+ * Uses currentColor so it matches the other profile icons
+ * and changes color on hover.
  */
-const SsrnIcon = ({ className }: { className?: string }) => (
+const GoogleScholarIcon = ({
+    className
+}: {
+    className?: string;
+}) => (
+    <svg
+        viewBox="0 0 24 24"
+        className={className}
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+    >
+        <path
+            fill="currentColor"
+            d="M12 2 1 8.25 12 14.5l9-5.11V16h2V8.25L12 2Z"
+        />
+        <path
+            fill="currentColor"
+            d="M5 12.47V17l7 4 7-4v-4.53l-7 3.98-7-3.98Z"
+        />
+        <circle
+            cx="12"
+            cy="17"
+            r="4"
+            fill="currentColor"
+            opacity="0.28"
+        />
+    </svg>
+);
+
+/*
+ * SSRN icon.
+ * Displays SSRN inside the same 24 × 24 icon space
+ * used by the other social icons.
+ */
+const SsrnIcon = ({
+    className
+}: {
+    className?: string;
+}) => (
     <svg
         viewBox="0 0 24 24"
         className={className}
@@ -71,8 +107,8 @@ export default function Profile({
     const messages = useMessages();
 
     /*
-     * This makes the component recognize the custom SSRN field,
-     * even if the original SiteConfig type does not yet declare it.
+     * Makes the component recognize the custom SSRN field,
+     * even if the original SiteConfig type does not declare it.
      */
     const socialWithSsrn = social as SiteConfig['social'] & {
         ssrn?: string;
@@ -88,7 +124,6 @@ export default function Profile({
         'email' | 'address' | null
     >(null);
 
-    // Check local storage for user's like status
     useEffect(() => {
         if (!features.enable_likes) return;
 
@@ -110,12 +145,17 @@ export default function Profile({
                 'jiale-website-user-liked',
                 'true'
             );
+
             setShowThanks(true);
-            setTimeout(() => setShowThanks(false), 2000);
+
+            setTimeout(() => {
+                setShowThanks(false);
+            }, 2000);
         } else {
             localStorage.removeItem(
                 'jiale-website-user-liked'
             );
+
             setShowThanks(false);
         }
     };
@@ -148,7 +188,7 @@ export default function Profile({
                   {
                       name: 'Google Scholar',
                       href: social.google_scholar,
-                      icon: AcademicCapIcon
+                      icon: GoogleScholarIcon
                   }
               ]
             : []),
@@ -223,7 +263,7 @@ export default function Profile({
                 {socialLinks.map(link => {
                     const IconComponent = link.icon;
 
-                    if (link.isLocation) {
+                    if ('isLocation' in link && link.isLocation) {
                         return (
                             <div
                                 key={link.name}
@@ -239,17 +279,20 @@ export default function Profile({
                                             'address'
                                         );
                                     }}
-                                    onMouseLeave={() =>
-                                        !isAddressPinned &&
-                                        setShowAddress(false)
-                                    }
+                                    onMouseLeave={() => {
+                                        if (!isAddressPinned) {
+                                            setShowAddress(false);
+                                        }
+                                    }}
                                     onClick={() => {
                                         setIsAddressPinned(
                                             !isAddressPinned
                                         );
+
                                         setShowAddress(
                                             !isAddressPinned
                                         );
+
                                         setLastClickedTooltip(
                                             'address'
                                         );
@@ -268,7 +311,6 @@ export default function Profile({
                                     )}
                                 </button>
 
-                                {/* Address tooltip */}
                                 <AnimatePresence>
                                     {(showAddress ||
                                         isAddressPinned) && (
@@ -295,22 +337,19 @@ export default function Profile({
                                                     : 'z-10'
                                             }`}
                                             onMouseEnter={() => {
-                                                if (
-                                                    !isAddressPinned
-                                                ) {
-                                                    setShowAddress(
-                                                        true
-                                                    );
+                                                if (!isAddressPinned) {
+                                                    setShowAddress(true);
                                                 }
 
                                                 setLastClickedTooltip(
                                                     'address'
                                                 );
                                             }}
-                                            onMouseLeave={() =>
-                                                !isAddressPinned &&
-                                                setShowAddress(false)
-                                            }
+                                            onMouseLeave={() => {
+                                                if (!isAddressPinned) {
+                                                    setShowAddress(false);
+                                                }
+                                            }}
                                         >
                                             <div className="text-center">
                                                 <div className="flex items-center justify-center space-x-2 mb-1">
@@ -340,9 +379,7 @@ export default function Profile({
                                                 {social.location_details?.map(
                                                     (line, index) => (
                                                         <p
-                                                            key={
-                                                                index
-                                                            }
+                                                            key={index}
                                                             className="break-words"
                                                         >
                                                             {line}
@@ -382,7 +419,7 @@ export default function Profile({
                         );
                     }
 
-                    if (link.isEmail) {
+                    if ('isEmail' in link && link.isEmail) {
                         return (
                             <div
                                 key={link.name}
@@ -398,17 +435,20 @@ export default function Profile({
                                             'email'
                                         );
                                     }}
-                                    onMouseLeave={() =>
-                                        !isEmailPinned &&
-                                        setShowEmail(false)
-                                    }
+                                    onMouseLeave={() => {
+                                        if (!isEmailPinned) {
+                                            setShowEmail(false);
+                                        }
+                                    }}
                                     onClick={() => {
                                         setIsEmailPinned(
                                             !isEmailPinned
                                         );
+
                                         setShowEmail(
                                             !isEmailPinned
                                         );
+
                                         setLastClickedTooltip(
                                             'email'
                                         );
@@ -427,7 +467,6 @@ export default function Profile({
                                     )}
                                 </button>
 
-                                {/* Email tooltip */}
                                 <AnimatePresence>
                                     {(showEmail ||
                                         isEmailPinned) && (
@@ -454,22 +493,19 @@ export default function Profile({
                                                     : 'z-10'
                                             }`}
                                             onMouseEnter={() => {
-                                                if (
-                                                    !isEmailPinned
-                                                ) {
-                                                    setShowEmail(
-                                                        true
-                                                    );
+                                                if (!isEmailPinned) {
+                                                    setShowEmail(true);
                                                 }
 
                                                 setLastClickedTooltip(
                                                     'email'
                                                 );
                                             }}
-                                            onMouseLeave={() =>
-                                                !isEmailPinned &&
-                                                setShowEmail(false)
-                                            }
+                                            onMouseLeave={() => {
+                                                if (!isEmailPinned) {
+                                                    setShowEmail(false);
+                                                }
+                                            }}
                                         >
                                             <div className="text-center">
                                                 <div className="flex items-center justify-center space-x-2 mb-1">
@@ -505,9 +541,7 @@ export default function Profile({
 
                                                 <div className="mt-2">
                                                     <a
-                                                        href={
-                                                            link.href
-                                                        }
+                                                        href={link.href}
                                                         className="inline-flex items-center justify-center space-x-2 bg-accent hover:bg-accent-dark text-white px-3 py-1 rounded-md text-xs font-medium transition-colors duration-200 w-full sm:w-auto"
                                                     >
                                                         <EnvelopeIcon className="h-4 w-4" />
@@ -605,7 +639,6 @@ export default function Profile({
                             </span>
                         </motion.button>
 
-                        {/* Thanks bubble */}
                         <AnimatePresence>
                             {showThanks && (
                                 <motion.div
